@@ -249,3 +249,8 @@ Prose 40k chars, Gemini 3.1 Pro, single-page target:
 | **both (stopwords+vowels)** | **19022 (48%)** | **1056** | **5/5,5/5** |
 "both" halves the chars -> fits 1 flat-billed page -> 5/5 AND 47% cheaper than uncompressed.
 Gemini reconstructs facts from vowel-dropped abbreviated text fine. Big lever for large docs.
+
+## T15: Gemini family generalization — flat billing holds across Gemini models
+gemini-3.5-flash: FLAT ~1080 tok (0.6-17 Mpx, same as 3.1-pro). Readability density 17.7 @ 4/5.
+The flat-billing + optical-readability property is a GEMINI-FAMILY trait, not just 3.1-pro.
+Method applies to gemini-3.1-pro (best), gemini-3.5-flash (cheaper), likely all Gemini vision.
