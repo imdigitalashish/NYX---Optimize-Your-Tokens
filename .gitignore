@@ -1,3 +1,10 @@
 render.bundle.js
+render.bundle.mjs
+png.bundle.mjs
 *.png
 node_modules/
+tomthumb.bdf
+render.ts
+png.ts
+atlas.ts
+atlas-gray.ts
