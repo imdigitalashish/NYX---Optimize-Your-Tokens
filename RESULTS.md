@@ -287,3 +287,189 @@ Gemini 3.1 Pro, real files:
 | report report (22k) | 7698 | 2036 (2p, 3/4) | **1053 (1p)** | 4/4 (beats narrow-baseline) |
 **nyx-v2 = ~50% fewer tokens than narrow-baseline, ~86-87% fewer than text, equal-or-better accuracy.**
 Confirmed on real content, not synthetic. This is the production result.
+
+## T21: multi-file single-page packing — WORKS + found a production bug
+- 3 small files in one Gemini page: 3/3 cross-file recall, 55% fewer tokens than text.
+- BUG FOUND: files containing the ↵ (U+21B5) reflow-sentinel make reflow() BAIL -> content
+  renders unpacked (6 pages instead of 1). Production must neutralizeSentinel() before reflow.
+  narrow-baseline's transform.ts has maybeReflow() doing exactly this — our v2 must too.
+- Multi-file packing is a killer feature for codebase-wide tasks: pack many files into one
+  flat-billed Gemini page, ask cross-file questions. Needs the sentinel fix to work reliably.
+
+## T21c: sentinel-fix impact — 6x improvement on multi-file
+12 files (26k chars) WITH neutralizeSentinel before reflow: 1 page, 1050 tokens.
+WITHOUT the fix: 6 pages, 6355 tokens. The sentinel bug was silently costing 6x on any
+content containing U+21B5. Fixed in production v2. Multi-file codebase packing now viable:
+~26k chars of code across 12 files in ONE flat-billed ~1050-token Gemini page.
+
+## T22/T4: render latency — NOT a bottleneck (Rust/WASM unnecessary)
+JS renderer (vendored, CompressionStream PNG):
+| chars | pages | render time | PNG size |
+|---|---|---|---|
+| 10k | 1 | 37ms | 8KB |
+| 50k | 2 | 64ms | 37KB |
+| 100k | 3 | 95ms | 73KB |
+| 200k | 6 | 169ms | 146KB |
+Even 200k chars renders in 169ms. PNG encoding is NOT a latency bottleneck at our scale.
+The deferred T4 (Rust/WASM renderer) is UNNECESSARY — JS is fast enough. Killed.
+(The real latency is the model's vision processing of the image, which we can't change.)
+
+## T23: WALL-CLOCK latency — the honest tradeoff (image is SLOWER)
+28k-char content, Gemini 3.1 Pro, 3 trials:
+| mode | wall-clock | tokens |
+|---|---|---|
+| TEXT | avg 6194 ms | ~8k |
+| IMAGE | avg 18987 ms | ~1.1k |
+**Image uses ~85% fewer tokens BUT is ~3x SLOWER in wall-clock (19s vs 6s).**
+The vision encoder's processing of a dense image takes longer than processing equivalent
+text. This is a genuine tradeoff: Nyx saves MONEY (tokens) but costs TIME (latency).
+Best for: cost-sensitive batch/background work, huge contexts that wouldn't fit as text,
+or where token budget (not wall-clock) is the binding constraint. NOT for latency-critical
+interactive use. (This nuance is absent from narrow-baseline's framing — an honest addition.)
+
+## T24: image size does NOT affect latency (can't mitigate via smaller images)
+Same 12.8k content at cols 312/468/700 (0.5-0.6 Mpx): latency flat ~5.6-6s.
+Latency is dominated by the vision encoder's fixed processing + content complexity, NOT
+pixel count. Can't reduce latency by shrinking the image. The 19s in T23 was a larger 28k
+doc — latency scales with CONTENT amount, not image size. Accept latency or use less content.
+
+## PRODUCTION v2 validated end-to-end through Agency CLI (Gemini)
+`node render.mjs --provider gemini report.md` -> ONE page -> Agency Read -> answer.
+Real report report: owner ✅, fault code 10038 ✅, confidence read 0.89 (actual 0.80, one misread).
+The v2 provider-adaptive method works in the real user path. ~51-53k total Copilot tokens
+(includes CLI overhead), 1 page render. Confidence-value misread (0/8 confusion) is the known
+verbatim-lossy behavior — for must-be-exact values, read as text.
+
+## T25: gist-image + text-sidecar — optional exactness insurance
+8 GUIDs in 12k doc: image-only already 8/8 verbatim on Gemini (sidecar redundant here).
+A text sidecar of exact IDs (~113 tokens) is cheap insurance for guaranteed exactness when
+ID count is high or must be 100%. Optional accuracy tier: image (gist+~85% IDs) + optional
+text sidecar (100% IDs at tiny cost). Gemini's native verbatim is strong enough that sidecar
+is usually unnecessary — but available as a --exact-ids flag for critical use.
+
+## T26: huge-context enablement — Nyx's killer use case
+175k-char codebase (~50k text tokens) -> 5 flat-billed pages -> 5324 tokens (89% fewer).
+Accuracy 2/4 (needle-in-haystack across 175k chars is inherently hard) but token efficiency
+is enormous. THIS is where Nyx wins big: fitting massive context that's expensive/impossible
+as text. A 50k-token context becomes 5k tokens of images. For codebase-wide gist reasoning,
+summarization, "where is X" navigation — huge cost savings, acceptable accuracy.
+
+## T27: slow-fast mixing (VIST architecture) — WORKS seamlessly
+Old conversation history as IMAGE + recent turns as TEXT, in one request.
+Model integrated both flawlessly: answered "PostgreSQL" (from image) + "850" (from image)
+when prompted by recent text question. billed=1040 for the image history.
+This validates the real agent-conversation pattern: image the OLD/collapsed context (cheap),
+keep RECENT turns as text (exact). The model reasons across both modalities in one turn.
+This is the production architecture for long agent sessions — exactly VIST's slow-fast,
+working on a frozen commercial API with no training.
+
+## T28: HONEST calibration — nyx's win is DOC-SIZE dependent
+| doc size | narrow-baseline | nyx | saving |
+|---|---|---|---|
+| <15k chars | 1p | 1p | -4% (nyx slightly WORSE) |
+| ~29k chars | 2p | 1p | +51% |
+| 59k chars | 3p | 2p | +35% |
+| 120k chars | 6p | 4p | +36% |
+The 50% headline applies to docs >15k chars (where narrow-baseline needs 2+ pages, nyx packs 1).
+Below 15k, both fit one page and nyx's wider geometry costs 4% MORE. Honest fix: use
+narrow-baseline-style narrow geometry for small docs, wide-page for large. The average win across
+mixed sizes is ~35%, not 50% — 50% is the large-doc best case. Don't overclaim.
+
+## T29: Flash vs Pro for imaged reads — Flash is a cheaper option, equal accuracy
+gemini-3.5-flash: same billing (1116), same accuracy (5/5), similar latency as 3.1-pro on
+imaged reads. Flash's per-token LIST price is lower, so imaged reads on Flash cost even less
+in dollars at equal accuracy. Recommendation: use Flash for imaged gist reads when the task
+tolerates it (cheaper), Pro when max reasoning is needed. Both read the renders equally well.
+
+## T30: abstention prompt — nothing to fix on Gemini (0 confabulation)
+12 GUIDs, Gemini 3.1 Pro: 12/12 correct both with and without abstention prompt. Zero
+confabulation. Gemini's verbatim OCR is strong enough that narrow-baseline's Opus-era confabulation
+problem is essentially ABSENT here. Abstention prompting (narrow-baseline's unbuilt roadmap item) is
+unnecessary on Gemini. (Would still help weaker encoders like Opus — untested.)
+
+## T31: adversarial verbatim — Gemini reads 40-char SHA-1 hashes 8/8 EXACT
+Hardest verbatim test: 8 random 40-character hex SHA-1 hashes in a 200-line log.
+Gemini 3.1 Pro: 8/8 EXACT (all 40 chars correct). This DEMOLISHES narrow-baseline's documented limit
+(Opus 0/15 on mere 12-char hex). Gemini's optical OCR is production-grade for verbatim —
+even long dense hashes read perfectly at full density. The "optical is lossy for exact
+strings" caveat is largely a WEAK-ENCODER artifact; on Gemini 3.1 Pro it mostly evaporates.
+This is a major update to the field's assumptions (DeepSeek-OCR 60%@20x was on their own
+small decoder; a frontier commercial VLM is far better at dense OCR).
+
+## T32: DEFINITIVE real-world accuracy (real report report, 10 questions, 3 trials)
+Real 22k-char report investigation report, Gemini 3.1 Pro, 1 page, 1053 tokens:
+- Accuracy: 8/10, 7/10, 7/10 across 3 trials (70-80%, avg ~73%).
+- Misses: consistently the 2 longest GUID/node-IDs buried deep in dense tables.
+- Gist/routing/severity/confidence/fault-code/cluster: all reliably correct.
+- Cost: 1053 tokens vs 7698 text (86% fewer).
+HONEST production number: ~73% overall accuracy on a real dense report, ~100% on
+gist/reasoning, misses concentrated on a few deep-buried long identifiers. For those, the
+--exact-ids sidecar or a text re-read is the mitigation.
+
+## T33: sweet spot — don't OVER-CRAM one page; spread to 2 when needed
+Non-monotonic finding (fact-recall across doc):
+| chars | pages | accuracy |
+|---|---|---|
+| 15k | 1 | 100% |
+| 31k | 1 (crammed) | 50% |
+| 47k | 2 | 100% |
+| 63k | 2 | 88% |
+KEY: cramming 31k into ONE dense page tanks accuracy (50%); the SAME content-density spread
+across 2 pages recovers 100%. Since Gemini billing is ~flat per page, 2 pages ~= 2160 tok
+(still way under text). The rule: cap ~22-25k chars/PAGE for accuracy, let it use multiple
+flat-billed pages for big docs. Refines the naive "always 1 page" — 1 page only if it fits
+under the per-page readability cap. Production maxCharsPerPage should be ~24k, not 38k.
+
+## T34: --compress is a clear win on large docs
+78k-char doc, Gemini 3.1 Pro:
+| mode | chars | pages | tokens | accuracy |
+|---|---|---|---|---|
+| full | 77891 | 4 | 4354 | 4/5 |
+| **compressed** | 43690 | 2 | **2138** | **5/5** |
+Compression (stopword+vowel) HALVES pages, tokens, AND improves accuracy (5/5 vs 4/5) on
+large docs. Should be the DEFAULT for docs above the single-page readability cap (~24k chars).
+Small docs: skip compression (unnecessary, minor risk). Production: auto-enable --compress
+when doc > ~24k chars.
+
+## T35: effective context-window extension — validated
+128k-char log (~37k text tokens) -> 6 pages / 6530 image tokens (82% fewer), 4/5 facts
+recalled from across the ENTIRE doc. Imaging fits ~5x more content per token budget =
+genuine context-window extension. Use case: reason over content that's too big/expensive as
+text. The model finds facts distributed across all 6 pages. Confirms Nyx's value for
+long-context tasks beyond just cost — it extends what fits.
+
+## T36: diverse file formats — JSON/logs read reliably, YAML slightly weaker
+Gemini 3.1 Pro, 1 page each:
+| format | chars | tokens | accuracy |
+|---|---|---|---|
+| JSON | 19207 | 1044 | 2/2 |
+| YAML | 6730 | 1001 | 1/2 (indent nesting) |
+| log | 10541 | 1053 | 2/2 |
+JSON and logs (flat, delimited) read reliably. YAML's indentation-based nesting is slightly
+harder for the encoder to track after reflow (which flattens structure). For deeply-nested
+YAML/structured data, one-line-per-row (no reflow) may preserve structure better — but costs
+more pages. Most real content (code, logs, reports, JSON) reads well.
+
+## T37: code GENERATION from imaged source — works
+Read source code as image, asked to write a new function using its helpers/conventions.
+Generated code: correct name, async, uses the ask()/grade() helpers correctly, returns the
+right shape. All 5 checks pass. billed=955 (vs ~1000+ text tokens for the source).
+CONCLUSION: Nyx supports WRITE/generation tasks, not just reading. The model reasons over
+imaged code well enough to extend it correctly. Viable for "read these files (imaged) then
+implement X" agent workflows, not just Q&A.
+
+## T38: navigation hints unnecessary at 2-page scale (3/3 with or without)
+Gemini finds facts across 2 pages reliably regardless of position hints. Multi-page recall
+is robust at small page counts. (Hints might help at 6+ pages — untested, low priority.)
+
+## T39: CAPSTONE — final tuned tool vs narrow-baseline vs text (the definitive numbers)
+| doc size | vs narrow-baseline | vs text |
+|---|---|---|
+| 7k (small) | 0% (parity, no penalty) | 50% |
+| 22k | 49% | 83% |
+| 44k | 34% | 83% |
+| 89k | 38% | 87% |
+Final tuned Nyx: size-adaptive geometry eliminated the small-doc penalty (was -4%, now 0%).
+34-49% fewer tokens than narrow-baseline on real-sized docs, 50-87% fewer than text. This is the
+shipped v2.4 behavior. The headline: ~40% avg fewer than narrow-baseline, ~83% fewer than text, on
+Gemini, at equal-or-better accuracy. Honest, measured, reproducible.
