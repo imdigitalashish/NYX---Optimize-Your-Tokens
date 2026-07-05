@@ -395,3 +395,13 @@ even long dense hashes read perfectly at full density. The "optical is lossy for
 strings" caveat is largely a WEAK-ENCODER artifact; on Gemini 3.1 Pro it mostly evaporates.
 This is a major update to the field's assumptions (DeepSeek-OCR 60%@20x was on their own
 small decoder; a frontier commercial VLM is far better at dense OCR).
+
+## T32: DEFINITIVE real-world accuracy (real report report, 10 questions, 3 trials)
+Real 22k-char report investigation report, Gemini 3.1 Pro, 1 page, 1053 tokens:
+- Accuracy: 8/10, 7/10, 7/10 across 3 trials (70-80%, avg ~73%).
+- Misses: consistently the 2 longest GUID/node-IDs buried deep in dense tables.
+- Gist/routing/severity/confidence/fault-code/cluster: all reliably correct.
+- Cost: 1053 tokens vs 7698 text (86% fewer).
+HONEST production number: ~73% overall accuracy on a real dense report, ~100% on
+gist/reasoning, misses concentrated on a few deep-buried long identifiers. For those, the
+--exact-ids sidecar or a text re-read is the mitigation.
