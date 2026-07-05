@@ -1,0 +1,8 @@
+{
+  "name": "nyx",
+  "version": "0.1.0",
+  "description": "Token-saving context compression: renders bulky files/logs/reports as dense PNG images the agent reads instead of raw text. ~45% fewer tokens on dense reports, ~66-80% on source code. Lossy for exact identifiers. Best on gemini-3.1-pro-preview.",
+  "author": { "name": "Ashish Kumar Verma" },
+  "homepage": "https://github.com/imdigitalashish/NYX---Optimize-Your-Tokens",
+  "license": "MIT"
+}
