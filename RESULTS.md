@@ -65,3 +65,17 @@ Prose corpus 22,780 chars, Gemini 3.1 Pro, single 2048px page:
 | SALIENCE-compressed (71% of chars) | 1079 | **6/7** |
 Salience masking IMPROVES accuracy at ~same token cost (fewer chars = more legible glyphs).
 Validated frozen-API adaptation of VIST's function-word masking.
+
+## T8: COMBINED PIPELINE (T3 geometry + T7 salience) — synthesis loop
+Regime matters:
+- Small doc (40k, fits 1 page): T3 geometry alone = 1113 tok @ 5/5 vs narrow-baseline 2162 (48% fewer).
+  Salience adds nothing (already 1 page), slightly hurts. -> use geometry only.
+- Large doc (81k, over readable limit): 
+  | method | billed | acc |
+  |---|---|---|
+  | narrow-baseline (4 pages) | 4388 | 2/5 |
+  | T3 geometry only (1 crammed pg) | 1073 | 1/5 (unreadable) |
+  | **T8 salience+geometry** | 1100 | **3-4/5** |
+  -> **75% fewer tokens than narrow-baseline AND better accuracy.** Salience rescues readability.
+
+RULE: doc <= readable-page -> geometry only. doc > readable -> add salience (or split pages).
