@@ -187,3 +187,22 @@ Opus atlas cell-size floor (3 trials, the REAL Opus optimum):
   at 8x12 is the Opus optimum.
 - Opus final: density ~7.4 char/tok (vs Gemini ~21, vs narrow-baseline's 5x8 which Opus reads at ~1/5).
 - So Nyx DOES beat narrow-baseline on Opus: narrow-baseline's 5x8 = garbage (1/5); Nyx 8x12 = 5/5 at density 7.4.
+
+## T11/T12: glyph floor + Gemini's TRUE density ceiling — REFINED
+T11 (AA/supersample): GPT-5.4 stays 0-1/5 at all cell sizes/AA. GPT is a hard dead-end.
+T12 (downscale probe): Gemini reads glyphs down to ~3.5x5.6px at 5/5 (well below 5x8 native).
+  But density is capped by FLAT BILLING, not glyph size — downscaling a 1-page image saves
+  nothing (already flat ~1054 tok).
+
+### Gemini TRUE density ceiling (one flat-billed 2348px-wide page, 2 trials):
+| chars | billed | density | accuracy |
+|---|---|---|---|
+| 38,398 | 1054 | **36.4** | 5/5, 5/5 ✅ CEILING |
+| 48,016 | 1064 | 45.1 | 1/5, 2/5 ❌ |
+| 57,847 | 1071 | 54.0 | 2/5, 2/5 ❌ |
+
+**Gemini real ceiling: ~38k chars @ density 36.4 char/tok in ONE ~1054-token page.**
+(My earlier "21" was on a smaller corpus — density rises with corpus size until the ~40k
+readability cliff, because billing is flat.) This is ~2.6x narrow-baseline's ~14 char/tok.
+
+Optimal Gemini config: 2348px-wide single page, ~38k chars max, native 5x8 AA glyphs.
