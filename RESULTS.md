@@ -142,3 +142,26 @@ density or method problem — their vision encoders don't OCR this synthetic bit
   Agency's Read (different path), NOT this bitmap atlas.
 - OPEN QUESTION (new thesis T9): does a real anti-aliased TrueType render (not the 5x8 atlas)
   unlock Opus/GPT? If yes, the method generalizes. If no, it's Gemini-strongest forever.
+
+## T9: glyph-SIZE is the Opus/GPT unlock (not atlas type) — FULL cross-provider verdict
+Cell-size sweep, small corpus, Gemini vs Opus vs GPT:
+| cell px | Gemini density@acc | Opus acc | GPT acc |
+|---|---|---|---|
+| 5x8 (narrow-baseline) | 21 @ 5/5 | 2/5 | 0/5 |
+| 7x10 | - | 1/5 | 2/5 |
+| 9x12 | - | 4/5 | 0/5 |
+| 11x14 | - | **5/5 @ density 5.1** | 0/5 (capped) |
+
+### FINAL VERDICT — provider capability is the real axis
+- **Gemini 3.1 Pro**: reads tiny 5x8 glyphs. Density ~21 char/tok. Flat billing. THE platform
+  for optical text compression. Nyx method wins 49-75% vs narrow-baseline here.
+- **Opus 4.8**: CAN read, but needs ~11x14 glyphs -> density only ~5 char/tok, and pixel-scaled
+  billing. Net: optical barely breaks even vs text on Opus. Marginal at best.
+- **GPT-5.4**: effectively CANNOT reliably OCR synthetic renders at any size (erratic 0-2/5).
+  Optical text compression does NOT work on GPT. Use text.
+
+### The single most important thing we learned
+narrow-baseline/Nyx optical compression is NOT a general technique. It is a **Gemini-3.1-Pro
+capability**. The 49-75% wins are real but Gemini-strongest. On Opus the savings are lower.
+This is the honest boundary of the whole approach — and neither narrow-baseline nor we can change it
+without the providers improving their vision encoders.
