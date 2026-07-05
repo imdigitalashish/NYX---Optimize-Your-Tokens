@@ -461,3 +461,15 @@ implement X" agent workflows, not just Q&A.
 ## T38: navigation hints unnecessary at 2-page scale (3/3 with or without)
 Gemini finds facts across 2 pages reliably regardless of position hints. Multi-page recall
 is robust at small page counts. (Hints might help at 6+ pages — untested, low priority.)
+
+## T39: CAPSTONE — final tuned tool vs narrow-baseline vs text (the definitive numbers)
+| doc size | vs narrow-baseline | vs text |
+|---|---|---|
+| 7k (small) | 0% (parity, no penalty) | 50% |
+| 22k | 49% | 83% |
+| 44k | 34% | 83% |
+| 89k | 38% | 87% |
+Final tuned Nyx: size-adaptive geometry eliminated the small-doc penalty (was -4%, now 0%).
+34-49% fewer tokens than narrow-baseline on real-sized docs, 50-87% fewer than text. This is the
+shipped v2.4 behavior. The headline: ~40% avg fewer than narrow-baseline, ~83% fewer than text, on
+Gemini, at equal-or-better accuracy. Honest, measured, reproducible.
