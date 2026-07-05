@@ -238,3 +238,14 @@ VERDICT: micro-atlas does NOT beat Spleen 5x8/8x12 on either provider. Spleen is
 near-optimal legibility-per-pixel. The binding constraint is the vision ENCODER's OCR
 ability, not the font design — a better font can't fix what the encoder can't resolve.
 Font engineering is a DEAD END; the wins are in billing-geometry (T3) + salience (T7).
+
+## T14: aggressive pre-render compression — stopwords + vowel-drop wins
+Prose 40k chars, Gemini 3.1 Pro, single-page target:
+| compressor | chars | billed | accuracy |
+|---|---|---|---|
+| none | 40031 (100%) | 2007 | 2/5,2/5 |
+| stopwords | 24793 (62%) | 1092 | 4/5,5/5 |
+| dropvowels | 33366 (83%) | 1072 | 4/5,5/5 |
+| **both (stopwords+vowels)** | **19022 (48%)** | **1056** | **5/5,5/5** |
+"both" halves the chars -> fits 1 flat-billed page -> 5/5 AND 47% cheaper than uncompressed.
+Gemini reconstructs facts from vowel-dropped abbreviated text fine. Big lever for large docs.
