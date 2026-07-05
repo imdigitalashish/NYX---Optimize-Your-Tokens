@@ -26,6 +26,14 @@ the best possible optical packing for APIs you can only call. Across 20 experime
 5. **Salience compression (stopword + vowel drop) before rendering** halves characters,
    preserves fact recall, and lets larger documents fit one flat-billed page.
 
+## A field-updating verbatim finding
+
+Prior work (narrow-baseline, DeepSeek-OCR) treats optical text as fundamentally lossy for exact
+strings (narrow-baseline: Opus 0/15 on 12-char hex; DeepSeek-OCR: 60% at 20x). We find this is largely
+a WEAK-ENCODER artifact. Gemini 3.1 Pro reads **8/8 exact 40-character SHA-1 hashes** and
+~85% of GUIDs at full density. On a frontier commercial VLM, the lossy-verbatim caveat mostly
+evaporates — a significant update to the assumptions of the optical-compression literature.
+
 ## Method (what to actually ship)
 
 Provider-adaptive:
