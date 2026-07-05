@@ -11,7 +11,7 @@ Prompt for you agent to install
 
 ## What it is
 
-Nyx is a tiny skill + renderer for **GitHub Copilot CLI** (and any agent whose
+Nyx is a tiny skill + renderer for **Agents** (and any agent whose
 built-in `Read` tool can open PNG files). When you ask the agent to work over large files
 or logs "using nyx", it renders that text into dense PNG pages and reads the **images**
 instead of the raw text. An image's token cost is fixed by its pixel size, not by how many
