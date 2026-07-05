@@ -35,3 +35,19 @@ doesn't work — use text.
 Novel contributions vs narrow-baseline: (1) flat-billing discovery + wide-page geometry, (2) salience
 pre-compression, (3) multi-file single-page packing, (4) provider-adaptive routing, (5) the
 honest latency tradeoff, (6) full cross-provider capability map.
+
+## Additional experiments (T26-T32)
+| # | thesis | verdict | key number |
+|---|--------|---------|-----------|
+| T26 | huge-context enablement | ✅ killer use | 175k chars -> 5k tok (89% fewer) |
+| T27 | slow-fast image+text mix | ✅ | VIST arch works on frozen API |
+| T28 | doc-size calibration | ⚠️ honest | win >15k chars; -4% small; avg 35% |
+| T29 | flash vs pro reads | ✅ | flash reads = pro, cheaper |
+| T30 | abstention prompt | ❌ unneeded | Gemini 12/12 GUIDs, 0 confab |
+| T31 | adversarial verbatim | 🔥 | 8/8 EXACT 40-char SHA hashes |
+| T32 | real-world accuracy | ✅ | ~73% on real report report @ 86% savings |
+
+## Field-updating result
+Gemini 3.1 Pro reads 40-char SHA-1 hashes 8/8 exact and ~85% of GUIDs. The "optical text is
+lossy for exact strings" assumption (narrow-baseline Opus 0/15, DeepSeek-OCR 60%@20x) is largely a
+weak-encoder artifact. On a frontier commercial VLM, dense-text OCR is production-grade.
