@@ -42,6 +42,12 @@ Provider-adaptive:
 | source-code-file (28k code), Gemini | 2172 tok, 3/3 | **1088 tok, 3/3** | −87% |
 | report report (22k), Gemini | 2036 tok, 3/4 | **1053 tok, 4/4** | −86% |
 
+## Latency tradeoff (important)
+
+Nyx saves ~85% of tokens but requests run ~3x SLOWER in wall-clock (vision processing of
+dense images > text of equivalent content). It optimizes COST, not SPEED. Use for
+cost-sensitive/batch/huge-context work; not for latency-critical interactive turns.
+
 ## The honest boundary
 
 Optical text compression is, today, a **Gemini-3.1-Pro capability**. The ~50% win over
