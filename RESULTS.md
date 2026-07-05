@@ -267,3 +267,10 @@ Adding a large-glyph 'verbatim band' HURT (2/3, +extra page, 2x tokens — confu
 Gemini's OCR is strong enough for verbatim IDs at normal density. The confabulation problem
 (from narrow-baseline's Opus-era findings) is a WEAK-ENCODER problem, largely absent on Gemini 3.1 Pro.
 -> No verbatim band needed for Gemini. (Would still help on Opus — untested, low priority.)
+
+## T18: verbatim GUID recall on Gemini — 80-87% (vs narrow-baseline's Opus 0/15)
+15 random GUIDs embedded in 200-line log, Gemini 3.1 Pro:
+- Exact recall 12-13/15 (80-87%), independent of density (10k-38k chars/page, flat billing).
+- Misses are encoder-inherent (a few chars in a few GUIDs), not fixable by density.
+- Far better than narrow-baseline's documented Opus 0/15. Gemini is genuinely usable for verbatim IDs
+  at ~85% — good enough for gist+most-IDs, not for must-be-perfect (keep those as text).
