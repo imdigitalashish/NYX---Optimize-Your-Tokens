@@ -301,3 +301,15 @@ Confirmed on real content, not synthetic. This is the production result.
 WITHOUT the fix: 6 pages, 6355 tokens. The sentinel bug was silently costing 6x on any
 content containing U+21B5. Fixed in production v2. Multi-file codebase packing now viable:
 ~26k chars of code across 12 files in ONE flat-billed ~1050-token Gemini page.
+
+## T22/T4: render latency — NOT a bottleneck (Rust/WASM unnecessary)
+JS renderer (vendored, CompressionStream PNG):
+| chars | pages | render time | PNG size |
+|---|---|---|---|
+| 10k | 1 | 37ms | 8KB |
+| 50k | 2 | 64ms | 37KB |
+| 100k | 3 | 95ms | 73KB |
+| 200k | 6 | 169ms | 146KB |
+Even 200k chars renders in 169ms. PNG encoding is NOT a latency bottleneck at our scale.
+The deferred T4 (Rust/WASM renderer) is UNNECESSARY — JS is fast enough. Killed.
+(The real latency is the model's vision processing of the image, which we can't change.)
