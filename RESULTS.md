@@ -332,3 +332,10 @@ Same 12.8k content at cols 312/468/700 (0.5-0.6 Mpx): latency flat ~5.6-6s.
 Latency is dominated by the vision encoder's fixed processing + content complexity, NOT
 pixel count. Can't reduce latency by shrinking the image. The 19s in T23 was a larger 28k
 doc — latency scales with CONTENT amount, not image size. Accept latency or use less content.
+
+## PRODUCTION v2 validated end-to-end through Agency CLI (Gemini)
+`node render.mjs --provider gemini report.md` -> ONE page -> Agency Read -> answer.
+Real report report: owner ✅, fault code 10038 ✅, confidence read 0.89 (actual 0.80, one misread).
+The v2 provider-adaptive method works in the real user path. ~51-53k total Copilot tokens
+(includes CLI overhead), 1 page render. Confidence-value misread (0/8 confusion) is the known
+verbatim-lossy behavior — for must-be-exact values, read as text.
