@@ -346,3 +346,10 @@ A text sidecar of exact IDs (~113 tokens) is cheap insurance for guaranteed exac
 ID count is high or must be 100%. Optional accuracy tier: image (gist+~85% IDs) + optional
 text sidecar (100% IDs at tiny cost). Gemini's native verbatim is strong enough that sidecar
 is usually unnecessary — but available as a --exact-ids flag for critical use.
+
+## T26: huge-context enablement — Nyx's killer use case
+175k-char codebase (~50k text tokens) -> 5 flat-billed pages -> 5324 tokens (89% fewer).
+Accuracy 2/4 (needle-in-haystack across 175k chars is inherently hard) but token efficiency
+is enormous. THIS is where Nyx wins big: fitting massive context that's expensive/impossible
+as text. A 50k-token context becomes 5k tokens of images. For codebase-wide gist reasoning,
+summarization, "where is X" navigation — huge cost savings, acceptable accuracy.
