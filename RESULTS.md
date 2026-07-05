@@ -362,3 +362,15 @@ This validates the real agent-conversation pattern: image the OLD/collapsed cont
 keep RECENT turns as text (exact). The model reasons across both modalities in one turn.
 This is the production architecture for long agent sessions — exactly VIST's slow-fast,
 working on a frozen commercial API with no training.
+
+## T28: HONEST calibration — nyx's win is DOC-SIZE dependent
+| doc size | narrow-baseline | nyx | saving |
+|---|---|---|---|
+| <15k chars | 1p | 1p | -4% (nyx slightly WORSE) |
+| ~29k chars | 2p | 1p | +51% |
+| 59k chars | 3p | 2p | +35% |
+| 120k chars | 6p | 4p | +36% |
+The 50% headline applies to docs >15k chars (where narrow-baseline needs 2+ pages, nyx packs 1).
+Below 15k, both fit one page and nyx's wider geometry costs 4% MORE. Honest fix: use
+narrow-baseline-style narrow geometry for small docs, wide-page for large. The average win across
+mixed sizes is ~35%, not 50% — 50% is the large-doc best case. Don't overclaim.
