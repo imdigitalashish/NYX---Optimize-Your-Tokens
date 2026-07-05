@@ -353,3 +353,12 @@ Accuracy 2/4 (needle-in-haystack across 175k chars is inherently hard) but token
 is enormous. THIS is where Nyx wins big: fitting massive context that's expensive/impossible
 as text. A 50k-token context becomes 5k tokens of images. For codebase-wide gist reasoning,
 summarization, "where is X" navigation — huge cost savings, acceptable accuracy.
+
+## T27: slow-fast mixing (VIST architecture) — WORKS seamlessly
+Old conversation history as IMAGE + recent turns as TEXT, in one request.
+Model integrated both flawlessly: answered "PostgreSQL" (from image) + "850" (from image)
+when prompted by recent text question. billed=1040 for the image history.
+This validates the real agent-conversation pattern: image the OLD/collapsed context (cheap),
+keep RECENT turns as text (exact). The model reasons across both modalities in one turn.
+This is the production architecture for long agent sessions — exactly VIST's slow-fast,
+working on a frozen commercial API with no training.
