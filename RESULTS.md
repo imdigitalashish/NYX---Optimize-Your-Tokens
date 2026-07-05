@@ -260,3 +260,10 @@ Compress (stopword+vowel) then pack: original 53.8k chars -> 29.8k -> ONE page -
 density 50.5 char/tok (but acc drops to 2-3/5 at that extreme). The rendered-char cliff (~40k
 per page) is fixed; compression lets MORE ORIGINAL content fit under it. Best reliable point:
 ~40k original chars/page at 5/5 with compression, ~36 char/tok effective. Beyond = accuracy loss.
+
+## T17/T5: hybrid verbatim band — UNNECESSARY on Gemini (reads GUIDs fine at normal density)
+Dense-only render: 3/3 exact GUIDs/hashes read correctly on Gemini 3.1 Pro.
+Adding a large-glyph 'verbatim band' HURT (2/3, +extra page, 2x tokens — confused the model).
+Gemini's OCR is strong enough for verbatim IDs at normal density. The confabulation problem
+(from narrow-baseline's Opus-era findings) is a WEAK-ENCODER problem, largely absent on Gemini 3.1 Pro.
+-> No verbatim band needed for Gemini. (Would still help on Opus — untested, low priority.)
