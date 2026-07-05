@@ -386,3 +386,12 @@ tolerates it (cheaper), Pro when max reasoning is needed. Both read the renders 
 confabulation. Gemini's verbatim OCR is strong enough that narrow-baseline's Opus-era confabulation
 problem is essentially ABSENT here. Abstention prompting (narrow-baseline's unbuilt roadmap item) is
 unnecessary on Gemini. (Would still help weaker encoders like Opus — untested.)
+
+## T31: adversarial verbatim — Gemini reads 40-char SHA-1 hashes 8/8 EXACT
+Hardest verbatim test: 8 random 40-character hex SHA-1 hashes in a 200-line log.
+Gemini 3.1 Pro: 8/8 EXACT (all 40 chars correct). This DEMOLISHES narrow-baseline's documented limit
+(Opus 0/15 on mere 12-char hex). Gemini's optical OCR is production-grade for verbatim —
+even long dense hashes read perfectly at full density. The "optical is lossy for exact
+strings" caveat is largely a WEAK-ENCODER artifact; on Gemini 3.1 Pro it mostly evaporates.
+This is a major update to the field's assumptions (DeepSeek-OCR 60%@20x was on their own
+small decoder; a frontier commercial VLM is far better at dense OCR).
