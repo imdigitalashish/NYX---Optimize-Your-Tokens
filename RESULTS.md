@@ -278,3 +278,12 @@ Gemini's OCR is strong enough for verbatim IDs at normal density. The confabulat
 ## T19: layout — reflowed blob beats columnar 3x on tokens (same accuracy)
 Reflowed blob: 1 page 1071 tok @ 4/4. Aligned columns: 3 pages 3190 tok @ 4/4.
 Column padding wastes pixels; reflow-packing is confirmed optimal. No structured-layout benefit.
+
+## T20: REAL-WORLD validation (actual code + report files) — v2 confirmed
+Gemini 3.1 Pro, real files:
+| file | text tok | narrow-baseline | nyx-v2 | v2 accuracy |
+|---|---|---|---|---|
+| source-code-file (28k code) | 8598 | 2172 (2p, 3/3) | **1088 (1p)** | 3/3 |
+| report report (22k) | 7698 | 2036 (2p, 3/4) | **1053 (1p)** | 4/4 (beats narrow-baseline) |
+**nyx-v2 = ~50% fewer tokens than narrow-baseline, ~86-87% fewer than text, equal-or-better accuracy.**
+Confirmed on real content, not synthetic. This is the production result.
