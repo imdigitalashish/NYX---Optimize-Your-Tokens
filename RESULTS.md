@@ -42,3 +42,16 @@ Head-to-head, 22,138-char corpus, Gemini 3.1 Pro:
 **>>> 50% FEWER TOKENS than narrow-baseline on Gemini** (accuracy 4/5 vs 5/5 — tune needed).
 
 Readability ceiling at flat billing (single page): ~22k chars = 5/5, ~29k = 2/5. Knee ~22-24k.
+
+### T3 TUNED — the Nyx-Gemini optimum (5/5 accuracy, 49% fewer tokens)
+Single page, varied width, 22k corpus, Gemini 3.1 Pro:
+| width | billed tok | density | accuracy |
+|---|---|---|---|
+| 1568 (narrow-baseline) as 1pg | 1100 | 20.1 | 4/5,3/5 |
+| 1808 | 1071 | 20.7 | 5/5,5/5 ✅ |
+| **2048** | **1065** | **20.8** | **5/5,5/5** ✅ WINNER |
+| 2348 | 1053 | 21.0 | 4/5,4/5 |
+
+**WINNER: single 2048px-wide page = 1065 tok @ 5/5, vs narrow-baseline 2093 tok = 49% FEWER.**
+Rule for Gemini: pack the whole doc into ONE ~2048px-wide page (up to ~22k chars),
+exploiting flat-tile billing. Narrower (1568) or wider (2348) both lose accuracy.
