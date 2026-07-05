@@ -437,3 +437,15 @@ recalled from across the ENTIRE doc. Imaging fits ~5x more content per token bud
 genuine context-window extension. Use case: reason over content that's too big/expensive as
 text. The model finds facts distributed across all 6 pages. Confirms Nyx's value for
 long-context tasks beyond just cost — it extends what fits.
+
+## T36: diverse file formats — JSON/logs read reliably, YAML slightly weaker
+Gemini 3.1 Pro, 1 page each:
+| format | chars | tokens | accuracy |
+|---|---|---|---|
+| JSON | 19207 | 1044 | 2/2 |
+| YAML | 6730 | 1001 | 1/2 (indent nesting) |
+| log | 10541 | 1053 | 2/2 |
+JSON and logs (flat, delimited) read reliably. YAML's indentation-based nesting is slightly
+harder for the encoder to track after reflow (which flattens structure). For deeply-nested
+YAML/structured data, one-line-per-row (no reflow) may preserve structure better — but costs
+more pages. Most real content (code, logs, reports, JSON) reads well.
