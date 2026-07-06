@@ -30,7 +30,7 @@ const TASKS = [
     {q:'was BackplaneCrashes zero or nonzero?', a:['zero','0']},
   ]},
   { name:'report report-2 (claude report)', file:`${T}/claude-report-2.md`, Q:[
-    {q:'what datapath/datapath component failed (SUBY/subsystem-x)?', a:['suby','subx']},
+    {q:'what datapath component failed (subsystem-x)?', a:['subx','suby']},
     {q:'is this a real incident or a misroute?', a:['real']},
   ]},
 ];
