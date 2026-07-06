@@ -59,8 +59,8 @@ cost-sensitive/batch/huge-context work; not for latency-critical interactive tur
 
 ## The honest boundary
 
-Optical text compression is, today, a **strongest on Gemini 3.1 Pro**. The ~50% win over
-the win is real but Gemini-specific. On Opus the savings are lower. This is set by
+Optical text compression is strongest on Gemini 3.1 Pro today. The ~50% win over
+the largest wins are on Gemini; Opus 4.8 works at lower savings. Results are set by
 provider vision encoders and no rendering trick changes it. As encoders improve, the
 technique generalizes; until then, use it on Gemini and fall back to text elsewhere.
 

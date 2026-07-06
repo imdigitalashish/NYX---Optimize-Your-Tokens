@@ -22,5 +22,5 @@ Synthesized from 13 experiments (T1-T13). This is the method.
 - **GPT / others / unknown** -> DO NOT image. Pass through as text (optical fails).
 
 ## The frozen boundary
-Optical text compression is a strongest on Gemini 3.1 Pro. On Opus it's marginal-but-usable.
+Optical text compression is strongest on Gemini 3.1 Pro; Opus 4.8 works at lower savings.
 On GPT it fails. This is set by provider vision encoders; no rendering trick changes it.

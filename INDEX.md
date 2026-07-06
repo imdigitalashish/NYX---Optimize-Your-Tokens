@@ -7,7 +7,7 @@
 | T3 | provider-tuned geometry | 🔥 breakthrough | Gemini FLAT ~1080 tok to 25 Mpx |
 | T7 | salience masking (VIST) | ✅ works | +2/7 accuracy, fewer chars |
 | T8 | combined synthesis | ✅ | 49-75% fewer than narrow baseline |
-| T9 | glyph-size unlock | ✅ finding | Opus needs 8-12px glyphs |
+| T9 | glyph-size unlock | ✅ finding | Opus needs 8-12px glyphs; some encoders read better than others |
 | T10 | font types (real fonts) | ❌ dead end | real fonts lose to 5x8 atlas |
 | T11 | anti-alias/supersample | ❌ | GPT still fails |
 | T12 | Gemini density ceiling | ✅ | ~38k chars/pg @ 36 char/tok |
@@ -29,7 +29,7 @@
 On **Gemini 3.1 Pro** (and Gemini family): Nyx cuts input tokens ~50% vs the narrow baseline, ~87% vs
 text, at equal-or-better accuracy, on real code and reports. It packs whole multi-file
 codebases into ONE flat-billed page. Verbatim GUID recall ~85%. Tradeoff: ~3x slower
-wall-clock (optimizes cost, not speed). On Opus: marginal-but-usable (8x12 glyphs). On GPT:
+wall-clock (optimizes cost, not speed). On Opus: usable at lower savings (8x12 glyphs). On some encoders:
 doesn't work — use text.
 
 Novel contributions: (1) flat-billing discovery + wide-page geometry, (2) salience

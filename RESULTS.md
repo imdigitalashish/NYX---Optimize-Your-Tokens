@@ -122,7 +122,7 @@ Billed image tokens by geometry, measured live:
 - Opus/GPT -> narrow minimal-pixel pages (already near-optimal there; our T1
   density-knee backoff to ~22k/page is the only improvement).
 
-## CRITICAL FINDING — readability depends on the model's vision encoder
+## FINDING — readability depends on the model.s vision encoder
 Tested Opus 4.8 and GPT-5.4 across ALL densities, including LOW density (3000 chars/page,
 large glyphs):
 | provider | cap3000 (big glyphs) | cap6000 | cap12000 |
@@ -141,7 +141,7 @@ density or method problem — their vision encoders don't OCR this synthetic bit
   on this atlas. The earlier "Opus 7/7" wins were on ANTI-ALIASED real-font renders through
   Agency's Read (different path), NOT this bitmap atlas.
 - OPEN QUESTION (new thesis T9): does a real anti-aliased TrueType render (not the 5x8 atlas)
-  unlock Opus/GPT? If yes, the method generalizes. If no, it's Gemini-strongest forever.
+  unlock Opus/others further? If yes, the method generalizes even more.
 
 ## T9: glyph-SIZE is the Opus/GPT unlock (not atlas type) — FULL cross-provider verdict
 Cell-size sweep, small corpus, Gemini vs Opus vs GPT:
@@ -162,7 +162,7 @@ Cell-size sweep, small corpus, Gemini vs Opus vs GPT:
 
 ### The single most important thing we learned
 optical text compression is NOT a general technique. It is a **Gemini-3.1-Pro
-capability**. The 49-75% wins are real but Gemini-strongest. On Opus the savings are lower.
+capability**. The largest wins are on Gemini; Opus works at lower savings.
 This is the honest boundary of the whole approach — and we cannot change it
 without the providers improving their vision encoders.
 
