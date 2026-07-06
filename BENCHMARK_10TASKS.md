@@ -1,63 +1,61 @@
-# Nyx 10-Task Benchmark Report — Gemini 3.1 Pro vs Claude Opus 4.8
+# Nyx 10-Task Benchmark — Gemini 3.1 Pro vs Opus 4.8 (10 DISTINCT real tasks)
 
-*Ten real work documents (report investigation reports + TTO investigation one-pagers from prior
-sessions), run through the Nyx v2.4 provider-adaptive renderer. Ground-truth questions
-verified from episodic memory. All tokens live-measured; accuracy graded against known facts.*
+*Ten genuinely different work documents across three investigation types — report investigation, SLI
+design, and TTO reduction — run through Nyx v2.4. Ground-truth questions verified from
+episodic memory. All tokens live-measured.*
 
-## Setup
-- **Tasks:** 4 real report investigation reports (report-1, report-3, report-2 x2) + 6 real TTO
-  reduction one-pagers. All authored in prior investigation sessions.
-- **Method:** each doc rendered with Nyx (Gemini profile: wide flat-billed page; Opus profile:
-  8x12 glyphs), then asked 2-4 ground-truth questions per doc.
-- **Measured:** image tokens billed (live), accuracy vs known answers, pages.
+## The 10 distinct tasks
+- **3 report investigation reports:** report-1 (LM misroute), report-3 (NIC link fault), report-2 (subsystem-x)
+- **3 SLI design documents:** design-doc-4, design-doc-5 (77k chars!), design-doc-6
+- **4 TTO reduction action-items:** doc-7 (module-a), doc-8 (module-b), doc-9 (OpenAI Tenant), doc-10 (OpenAI Stream)
+
+Size range: 9k → 77k chars. Different topics, formats, and question types per doc.
 
 ## Per-task results
 
 | # | Task | chars | text tok~ | Gemini tok | Gem acc | Opus tok | Opus acc |
 |---|------|------:|------:|------:|:--:|------:|:--:|
-| 1 | report report-1 (LM misroute) | 22655 | 6473 | **1053** | 4/4 | 2904 | 4/4 |
-| 2 | report report-3 (NIC link fault) | 18762 | 5361 | **1056** | 4/4 | 2418 | 4/4 |
-| 3 | report report-2 (subsystem-x) | 22090 | 6311 | **1053** | 4/4 | 2904 | 4/4 |
-| 4 | report report-2 (claude report) | 12818 | 3662 | **1060** | 2/2 | 1659 | 2/2 |
-| 5 | TTO one-pager doc-7 | 9463 | 2704 | 1098 | 2/2 | 1245 | 2/2 |
-| 6 | TTO one-pager 755981689 | 12536 | 3582 | 1080 | 2/2 | 1590 | 2/2 |
-| 7 | TTO one-pager doc-8 | 7602 | 2172 | 1080 | 2/2 | 969 | 2/2 |
-| 8 | TTO one-pager doc-9 | 7926 | 2265 | 1080 | 1/2 | 1038 | 1/2 |
-| 9 | TTO one-pager 759789961 | 8527 | 2436 | 1024 | 2/2 | 1107 | 2/2 |
-| 10 | TTO one-pager 760373336 | 9310 | 2660 | 1000 | 1/2 | 1176 | 1/2 |
+| 1 | report report-1 (LM misroute) | 22655 | 6473 | **1053** | 3/3 | 2904 | 3/3 |
+| 2 | report report-3 (NIC link fault) | 18762 | 5361 | **1056** | 3/3 | 2418 | 2/3 |
+| 3 | report report-2 (subsystem-x) | 22090 | 6311 | **1053** | 1/3 | 2904 | 2/3 |
+| 4 | SLI design-doc-4 | 35926 | 10265 | **2206** | 3/3 | 4560 | 3/3 |
+| 5 | SLI design-doc-5 | 77339 | 22097 | **4389** | 2/2 | 9810 | 2/2 |
+| 6 | SLI design-doc-6 | 29910 | 8546 | **2177** | 2/2 | 3801 | 2/2 |
+| 7 | TTO doc-7 module-a | 9420 | 2691 | 1098 | 2/2 | 1245 | 2/2 |
+| 8 | TTO doc-8 module-b | 10425 | 2979 | 1053 | 2/2 | 1383 | 2/2 |
+| 9 | TTO doc-9 OpenAI Tenant | 8925 | 2550 | 1000 | 2/2 | 1176 | 2/2 |
+| 10 | TTO doc-10 OpenAI Stream | 10445 | 2984 | 1053 | 2/2 | 1383 | 1/2 |
 
-## Aggregate
+## Aggregate (10 distinct tasks, 24 questions)
 
 | metric | Gemini 3.1 Pro | Claude Opus 4.8 |
 |---|---|---|
-| Total image tokens (10 tasks) | **10,584** | 17,010 |
-| Total text tokens (est) | 37,626 | 37,626 |
-| **Token savings vs text** | **72% fewer** | **55% fewer** |
-| Average accuracy | **90%** | **90%** |
-| Tokens vs the other model | 1.0x (baseline) | **1.6x more** |
+| Total text tokens (est) | 70,257 | 70,257 |
+| **Total image tokens** | **16,138** | 31,584 |
+| **Savings vs text** | **77% fewer** | **55% fewer** |
+| **Accuracy** | **22/24 (92%)** | **21/24 (88%)** |
+| Token cost vs the other model | 1.0x | **2.0x more** |
 
 ## Findings
 
-1. **Both models saved a lot of tokens at equal accuracy (90%).** The method works on both —
-   this corrects earlier pessimism about Opus (with the 8x12 glyph profile it reads reliably).
+1. **Gemini: 77% fewer tokens than text at 92% accuracy** across diverse real docs. The big
+   win is on large docs — the 77k-char SLI doc cost Gemini just **4,389 tokens** (vs 22k as
+   text, an 80% cut) because of flat-tile billing.
 
-2. **Gemini is far cheaper: 72% vs 55% token savings, and 1.6x fewer tokens than Opus** for
-   identical tasks. This is the flat-billing advantage — Gemini bills ~1053-1098 tokens per
-   doc regardless of size, while Opus scales with pixels (2418-2904 on the big report reports).
+2. **Opus: 55% fewer tokens at 88% accuracy** — works well, but costs **2.0x Gemini's tokens**
+   for identical tasks. On the 77k SLI doc Opus paid **9,810 tokens** (pixel-billed, multi-page)
+   vs Gemini's 4,389. The pixel-billing penalty compounds on large docs.
 
-3. **Accuracy was identical (90%) on both models.** The 2 misses (tasks 8, 10) were the same
-   on both — a "does it recommend shrinking the window" nuance the docs phrase indirectly, not
-   a rendering failure. On the report reports (dense, identifier-heavy), both hit 4/4.
+3. **Accuracy is high and close (92% vs 88%).** The misses were concentrated on task 3
+   (report-2 — deeply-nested node/region facts buried in dense tables) and a couple of TTO
+   nuances — not systematic. Both models nailed all SLI-design and most report/TTO questions.
 
-4. **Big docs favor Gemini most.** On the three 18-22k report reports, Opus paid 2418-2904 tokens
-   (2-3 pages, pixel-billed) vs Gemini's flat ~1053 (1 page). On small one-pagers the gap
-   narrows (Opus even slightly cheaper on the 7.6k doc, since few pixels).
+4. **Doc type doesn't break it.** report investigation, SLI design, and TTO action-items all read
+   reliably — the method generalizes across your real investigation document types.
 
 ## Bottom line
 
-On 10 real investigation documents:
-- **Gemini 3.1 Pro: 72% fewer tokens than text, 90% accuracy** — the clear winner.
-- **Opus 4.8: 55% fewer tokens than text, 90% accuracy** — works well too, but costs 1.6x
-  Gemini's tokens because of pixel-based image billing.
-- Use **Gemini for cost-optimal Nyx**; Opus is a viable fallback at equal accuracy but higher
-  token cost. Both are real wins over sending these docs as text.
+Across **10 genuinely distinct real tasks** (report + SLI + TTO, 9k–77k chars):
+- **Gemini 3.1 Pro is the clear choice: 77% fewer tokens, 92% accuracy.**
+- **Opus 4.8 works at 88% accuracy but costs 2x the tokens** — viable fallback, not cost-optimal.
+- On large documents the gap widens sharply (Gemini's flat billing vs Opus's pixel billing).
