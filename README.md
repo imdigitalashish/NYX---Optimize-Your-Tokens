@@ -12,7 +12,7 @@ technique works and where it doesn't.
 ## The one-paragraph truth
 
 On **Gemini 3.1 Pro / Gemini family**, Nyx cuts input tokens **~35% (avg) to ~50% (large
-docs)** vs the prior art (narrow-baseline), and **~85-89% vs raw text**, at equal-or-better accuracy
+docs)** vs a narrow single-geometry baseline, and **~85-89% vs raw text**, at equal-or-better accuracy
 on real code and reports. It packs whole multi-file codebases into ONE flat-billed image.
 On **Claude Opus 4.8** it's marginal-but-usable. On **GPT** it doesn't work — read as text.
 The tradeoff: imaged requests are **~3× slower in wall-clock** (optimizes cost, not speed).
@@ -21,12 +21,12 @@ The tradeoff: imaged requests are **~3× slower in wall-clock** (optimizes cost,
 
 Image-token billing is **provider-specific**, and we measured it live:
 - **Gemini bills a FLAT ~1080 tokens for ANY image from 0.6 to 25 megapixels.** Image size
-  is nearly free — only readability limits density. This is the key insight narrow-baseline (tuned for
+  is nearly free — only readability limits density. This is the key insight a Claude-tuned approach (built for
   Claude's `pixels/750` billing) never exploited.
-- Opus/GPT scale with pixels then cap — narrow-baseline's small page is right for them.
+- Opus/GPT scale with pixels then cap — a small page is right for them.
 
 So on Gemini, Nyx packs the whole document into ONE wide, dense, flat-billed page instead of
-narrow-baseline's multiple Claude-sized pages → ~50% fewer tokens on large docs.
+multiple Claude-sized pages → ~50% fewer tokens on large docs.
 
 ## Install (GitHub Copilot CLI / Agency)
 
@@ -50,13 +50,13 @@ node render.mjs --provider gemini --multifile  <many-files> # whole codebase, on
 
 ## What we proved (headline numbers, live-measured)
 
-| content | text tokens | narrow-baseline | **Nyx** |
+| content | text tokens | narrow baseline | **Nyx** |
 |---|---|---|---|
 | source-code-file (28k code), Gemini | 8598 | 2172 (3/3) | **1088 (3/3)** |
 | report report (22k), Gemini | 7698 | 2036 (3/4) | **1053 (4/4)** |
 | 175k-char codebase, Gemini | ~50000 | — | **5324 (89% fewer)** |
 
-- Verbatim GUID recall on Gemini: **~85%** (vs narrow-baseline's documented Opus 0/15).
+- Verbatim GUID recall on Gemini: **~85%** (vs a weak encoder's 0/15).
 - Multi-file: 12 files / 26k chars → ONE page / ~1050 tokens.
 - Slow-fast (image-history + text-recent) integrates seamlessly — the agent-conversation pattern.
 

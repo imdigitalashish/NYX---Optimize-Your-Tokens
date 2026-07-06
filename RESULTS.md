@@ -1,16 +1,16 @@
 # Nyx Research — live results
 
 ## T1: density/accuracy cliff (Gemini 3.1 Pro) — CONFIRMED FINDING
-narrow-baseline's default 28080 chars/page is PAST the accuracy knee on identifier-dense content.
+the naive 28080 chars/page is PAST the accuracy knee on identifier-dense content.
 
 | chars/page | billed tok | char/tok | accuracy (3 trials) |
 |---|---|---|---|
 | 18000 | 2208 | 13.4 | 6/6, 6/6, 6/6 ✅ |
 | 22000 | 2180 | 13.6 | 6/6, 6/6, 6/6 ✅ |
-| 28080 (narrow-baseline default) | 2068 | 14.4 | 4/6, 4/6, 4/6 ❌ (−33%) |
+| 28080 (naive max-pack) | 2068 | 14.4 | 4/6, 4/6, 4/6 ❌ (−33%) |
 
 **Actionable:** cap at ~22k chars/page → recover 33% accuracy at ~5% token cost.
-narrow-baseline leaves accuracy on the table by over-packing. First concrete improvement.
+naive max-packing leaves accuracy on the table. First concrete improvement.
 
 ## T2: color-channel packing — KILLED
 Hypothesis: pack 3 text layers in R/G/B channels for 3x density.
@@ -30,16 +30,16 @@ Measured real billed-tokens(w,h). AXIOM A3 (px/750 universal) is FALSE.
 **Gemini bills ~1080 tokens FLAT from 0.59 Mpx to 25 Mpx** (tested 6144x4096).
 Image size is nearly free on Gemini — only readability limits density.
 
-narrow-baseline's 1568x728 page is tuned for Claude's px/750 billing. On Gemini it wastes money by
+the narrow 1568x728 geometry is tuned for Claude's px/750 billing. On Gemini it wastes money by
 splitting into multiple flat-billed pages. Fix: ONE wide page per doc.
 
 Head-to-head, 22,138-char corpus, Gemini 3.1 Pro:
 | geometry | pages | billed tok | density | accuracy |
 |---|---|---|---|---|
-| narrow-baseline (1568w,728h) | 2 | 2093 | 10.6 | 5/5,5/5,5/5 |
+| narrow (1568w,728h) | 2 | 2093 | 10.6 | 5/5,5/5,5/5 |
 | Nyx-opt (wide 1pg 2348w) | 1 | 1053 | 21.0 | 4/5,4/5,4/5 |
 
-**>>> 50% FEWER TOKENS than narrow-baseline on Gemini** (accuracy 4/5 vs 5/5 — tune needed).
+**>>> 50% FEWER TOKENS than the narrow baseline on Gemini** (accuracy 4/5 vs 5/5 — tune needed).
 
 Readability ceiling at flat billing (single page): ~22k chars = 5/5, ~29k = 2/5. Knee ~22-24k.
 
@@ -47,7 +47,7 @@ Readability ceiling at flat billing (single page): ~22k chars = 5/5, ~29k = 2/5.
 Single page, varied width, 22k corpus, Gemini 3.1 Pro:
 | width | billed tok | density | accuracy |
 |---|---|---|---|
-| 1568 (narrow-baseline) as 1pg | 1100 | 20.1 | 4/5,3/5 |
+| 1568 (narrow) as 1pg | 1100 | 20.1 | 4/5,3/5 |
 | 1808 | 1071 | 20.7 | 5/5,5/5 ✅ |
 | **2048** | **1065** | **20.8** | **5/5,5/5** ✅ WINNER |
 | 2348 | 1053 | 21.0 | 4/5,4/5 |
@@ -73,10 +73,10 @@ Regime matters:
 - Large doc (81k, over readable limit): 
   | method | billed | acc |
   |---|---|---|
-  | narrow-baseline (4 pages) | 4388 | 2/5 |
+  | narrow (4 pages) | 4388 | 2/5 |
   | T3 geometry only (1 crammed pg) | 1073 | 1/5 (unreadable) |
   | **T8 salience+geometry** | 1100 | **3-4/5** |
-  -> **75% fewer tokens than narrow-baseline AND better accuracy.** Salience rescues readability.
+  -> **75% fewer tokens than the narrow baseline AND better accuracy.** Salience rescues readability.
 
 RULE: doc <= readable-page -> geometry only. doc > readable -> add salience (or split pages).
 
@@ -84,17 +84,17 @@ RULE: doc <= readable-page -> geometry only. doc > readable -> add salience (or 
 Large doc (35.5k full / 29k salience), Gemini 3.1 Pro:
 | method | pages | billed | accuracy |
 |---|---|---|---|
-| narrow-baseline | 4 | 4388 | 2/5 |
+| narrow baseline | 4 | 4388 | 2/5 |
 | **Nyx (salience + 2048w + 22k/page split)** | 2 | **2151** | **5/5** |
-**>>> 51% fewer tokens AND perfect accuracy where narrow-baseline fails.**
+**>>> 51% fewer tokens AND perfect accuracy where the narrow baseline fails.**
 
-### THE NYX METHOD (frozen commercial VLM, no training) — beats narrow-baseline
+### THE NYX METHOD (frozen commercial VLM, no training)
 1. Salience-compress: drop stopwords (VIST PVE, frozen-API adaptation).
-2. Geometry: 2048px-wide pages (not narrow-baseline's 1568) — tuned to Gemini flat-tile billing (T3).
+2. Geometry: 2048px-wide pages (not the narrow 1568) — tuned to Gemini flat-tile billing (T3).
 3. Split at ~22k chars/page (readability knee, T1) — extra pages ~free on Gemini's flat billing.
-Result: 49-75% fewer tokens than narrow-baseline across doc sizes, equal-or-better accuracy on Gemini.
+Result: 49-75% fewer tokens than the narrow baseline across doc sizes, equal-or-better accuracy on Gemini.
 Provenance: novel synthesis of T1(density knee)+T3(provider billing)+T7(salience/VIST) that
-narrow-baseline never exploited (it's Claude-tuned, single-geometry, no salience).
+the narrow baseline never exploited (Claude-tuned, single-geometry, no salience).
 
 ## T3 CROSS-PROVIDER billing (CRITICAL — the axiom fully mapped)
 Billed image tokens by geometry, measured live:
@@ -102,7 +102,7 @@ Billed image tokens by geometry, measured live:
 | WxH | Mpx | Gemini 3.1 | Opus 4.8 | GPT-5.4 |
 |---|---|---|---|---|
 | 768x768 | 0.59 | 1089 | 787 | 692 |
-| 1568x728 (narrow-baseline) | 1.14 | 1078 | 1459 | 1353 |
+| 1568x728 (narrow baseline) | 1.14 | 1078 | 1459 | 1353 |
 | 2048x768 | 1.57 | 1080 | 2075 | 1844 |
 | 2048x2048 | 4.19 | 1089 | 4764 | 2805 |
 | 4096x2048 | 8.39 | 1081 | 4235* | 2340* |
@@ -112,14 +112,14 @@ Billed image tokens by geometry, measured live:
 ### THREE DIFFERENT BILLING REGIMES — one method cannot be optimal for all:
 - **Gemini: FLAT ~1080 tokens regardless of size.** Pack as big/wide as readable. Extra
   pages nearly free. THE big opportunity. Nyx-Gemini method exploits this.
-- **Opus 4.8: scales ~px/750 up to ~1.15Mpx, then caps ~4700.** narrow-baseline's 1568x728 is
+- **Opus 4.8: scales ~px/750 up to ~1.15Mpx, then caps ~4700.** the narrow 1568x728 is
   correctly tuned here. To save on Opus, minimize pixels -> SMALL dense pages (opposite of Gemini!).
 - **GPT-5.4: scales with px, caps ~2700.** Similar to Opus; small pages win.
 - GPT-5.5 is Responses-API only (not testable via chat/completions here).
 
 ### IMPLICATION: Nyx must be PROVIDER-ADAPTIVE.
 - Gemini -> wide flat-billed pages (our 49-75% win).
-- Opus/GPT -> narrow-baseline-style minimal-pixel pages (narrow-baseline already near-optimal there; our T1
+- Opus/GPT -> narrow minimal-pixel pages (already near-optimal there; our T1
   density-knee backoff to ~22k/page is the only improvement).
 
 ## CRITICAL FINDING — the method is Gemini-ONLY (Opus/GPT can't read the glyphs)
@@ -130,14 +130,14 @@ large glyphs):
 | Opus 4.8 | 1/5 | 0/5 | 0/5 |
 | GPT-5.4 | 0/5 | 0/5 | 0/5 |
 
-Opus and GPT CANNOT read narrow-baseline's 5x8 bitmap-atlas glyphs at ANY density. This is not a
+Opus and GPT CANNOT read dense 5x8 bitmap-atlas glyphs at ANY density. This is not a
 density or method problem — their vision encoders don't OCR this synthetic bitmap font.
 (Gemini 3.1 Pro reads it fine — 5/5 at 22k/page.)
 
 ### Consequence for the thesis
-- Nyx (and narrow-baseline's whole approach) is effectively a **Gemini-3.1-Pro-only** technique with
+- optical text compression is effectively a **Gemini-3.1-Pro-only** technique with
   the current bitmap atlas. On Opus/GPT it saves ~15-18% tokens but at 0/5 accuracy = useless.
-- narrow-baseline's own docs already flagged Opus as weak; our data shows it's not weak, it's ~zero
+- prior reports flagged Opus as weak; our data shows it's not weak, it's ~zero
   on this atlas. The earlier "Opus 7/7" wins were on ANTI-ALIASED real-font renders through
   Agency's Read (different path), NOT this bitmap atlas.
 - OPEN QUESTION (new thesis T9): does a real anti-aliased TrueType render (not the 5x8 atlas)
@@ -147,23 +147,23 @@ density or method problem — their vision encoders don't OCR this synthetic bit
 Cell-size sweep, small corpus, Gemini vs Opus vs GPT:
 | cell px | Gemini density@acc | Opus acc | GPT acc |
 |---|---|---|---|
-| 5x8 (narrow-baseline) | 21 @ 5/5 | 2/5 | 0/5 |
+| 5x8 (dense) | 21 @ 5/5 | 2/5 | 0/5 |
 | 7x10 | - | 1/5 | 2/5 |
 | 9x12 | - | 4/5 | 0/5 |
 | 11x14 | - | **5/5 @ density 5.1** | 0/5 (capped) |
 
 ### FINAL VERDICT — provider capability is the real axis
 - **Gemini 3.1 Pro**: reads tiny 5x8 glyphs. Density ~21 char/tok. Flat billing. THE platform
-  for optical text compression. Nyx method wins 49-75% vs narrow-baseline here.
+  for optical text compression. Nyx method wins 49-75% vs the narrow baseline here.
 - **Opus 4.8**: CAN read, but needs ~11x14 glyphs -> density only ~5 char/tok, and pixel-scaled
   billing. Net: optical barely breaks even vs text on Opus. Marginal at best.
 - **GPT-5.4**: effectively CANNOT reliably OCR synthetic renders at any size (erratic 0-2/5).
   Optical text compression does NOT work on GPT. Use text.
 
 ### The single most important thing we learned
-narrow-baseline/Nyx optical compression is NOT a general technique. It is a **Gemini-3.1-Pro
+optical text compression is NOT a general technique. It is a **Gemini-3.1-Pro
 capability**. The 49-75% wins are real but Gemini-only. On Opus it's marginal; on GPT it fails.
-This is the honest boundary of the whole approach — and neither narrow-baseline nor we can change it
+This is the honest boundary of the whole approach — and we cannot change it
 without the providers improving their vision encoders.
 
 ## T10: FONT-TYPE experiment + Opus optimum — REAL fonts LOSE to compact atlas
@@ -185,8 +185,8 @@ Opus atlas cell-size floor (3 trials, the REAL Opus optimum):
   reliable 5/5. That's 45% denser than my first Opus conclusion.
 - Real fonts are a DEAD END for density (browser pixels too big). The compact bitmap atlas
   at 8x12 is the Opus optimum.
-- Opus final: density ~7.4 char/tok (vs Gemini ~21, vs narrow-baseline's 5x8 which Opus reads at ~1/5).
-- So Nyx DOES beat narrow-baseline on Opus: narrow-baseline's 5x8 = garbage (1/5); Nyx 8x12 = 5/5 at density 7.4.
+- Opus final: density ~7.4 char/tok (vs Gemini ~21, vs the dense 5x8 which Opus reads at ~1/5).
+- On Opus, the dense 5x8 = garbage (1/5); Nyx 8x12 = 5/5 at density 7.4.
 
 ## T11/T12: glyph floor + Gemini's TRUE density ceiling — REFINED
 T11 (AA/supersample): GPT-5.4 stays 0-1/5 at all cell sizes/AA. GPT is a hard dead-end.
@@ -203,7 +203,7 @@ T12 (downscale probe): Gemini reads glyphs down to ~3.5x5.6px at 5/5 (well below
 
 **Gemini real ceiling: ~38k chars @ density 36.4 char/tok in ONE ~1054-token page.**
 (My earlier "21" was on a smaller corpus — density rises with corpus size until the ~40k
-readability cliff, because billing is flat.) This is ~2.6x narrow-baseline's ~14 char/tok.
+readability cliff, because billing is flat.) This is ~2.6x the naive ~14 char/tok.
 
 Optimal Gemini config: 2348px-wide single page, ~38k chars max, native 5x8 AA glyphs.
 
@@ -211,12 +211,12 @@ Optimal Gemini config: 2348px-wide single page, ~38k chars max, native 5x8 AA gl
 | method | pages | billed | vs text | accuracy |
 |---|---|---|---|---|
 | TEXT | - | 9435 | - | 5/5 (trivial) |
-| narrow-baseline | 2 | 2180 | -77% | 3/5,3/5,3/5 |
+| narrow baseline | 2 | 2180 | -77% | 3/5,3/5,3/5 |
 | **Nyx (salience+2348w+38k page)** | 1 | **1110** | **-88%** | 3/5,3/5,3/5 |
 
-**>>> Nyx = 49% fewer tokens than narrow-baseline at EQUAL accuracy (both 3/5).**
+**>>> Nyx = 49% fewer tokens than the narrow baseline at EQUAL accuracy (both 3/5).**
 **>>> Nyx = 88% fewer tokens than plain text.**
-On Gemini this is the money result: half of narrow-baseline's cost, no accuracy loss.
+On Gemini this is the money result: half the narrow-baseline cost, no accuracy loss.
 (Both at 3/5 on hard dense prose — the accuracy ceiling is the encoder, same for both;
 Nyx's advantage is purely token efficiency via flat-billing geometry + salience.)
 
@@ -265,14 +265,14 @@ per page) is fixed; compression lets MORE ORIGINAL content fit under it. Best re
 Dense-only render: 3/3 exact GUIDs/hashes read correctly on Gemini 3.1 Pro.
 Adding a large-glyph 'verbatim band' HURT (2/3, +extra page, 2x tokens — confused the model).
 Gemini's OCR is strong enough for verbatim IDs at normal density. The confabulation problem
-(from narrow-baseline's Opus-era findings) is a WEAK-ENCODER problem, largely absent on Gemini 3.1 Pro.
+(a known weak-encoder failure mode) is a WEAK-ENCODER problem, largely absent on Gemini 3.1 Pro.
 -> No verbatim band needed for Gemini. (Would still help on Opus — untested, low priority.)
 
-## T18: verbatim GUID recall on Gemini — 80-87% (vs narrow-baseline's Opus 0/15)
+## T18: verbatim GUID recall on Gemini — 80-87% (vs a weak encoder's 0/15)
 15 random GUIDs embedded in 200-line log, Gemini 3.1 Pro:
 - Exact recall 12-13/15 (80-87%), independent of density (10k-38k chars/page, flat billing).
 - Misses are encoder-inherent (a few chars in a few GUIDs), not fixable by density.
-- Far better than narrow-baseline's documented Opus 0/15. Gemini is genuinely usable for verbatim IDs
+- Far better than a weak encoder's 0/15. Gemini is genuinely usable for verbatim IDs
   at ~85% — good enough for gist+most-IDs, not for must-be-perfect (keep those as text).
 
 ## T19: layout — reflowed blob beats columnar 3x on tokens (same accuracy)
@@ -281,18 +281,18 @@ Column padding wastes pixels; reflow-packing is confirmed optimal. No structured
 
 ## T20: REAL-WORLD validation (actual code + report files) — v2 confirmed
 Gemini 3.1 Pro, real files:
-| file | text tok | narrow-baseline | nyx-v2 | v2 accuracy |
+| file | text tok | narrow | nyx-v2 | v2 accuracy |
 |---|---|---|---|---|
 | source-code-file (28k code) | 8598 | 2172 (2p, 3/3) | **1088 (1p)** | 3/3 |
-| report report (22k) | 7698 | 2036 (2p, 3/4) | **1053 (1p)** | 4/4 (beats narrow-baseline) |
-**nyx-v2 = ~50% fewer tokens than narrow-baseline, ~86-87% fewer than text, equal-or-better accuracy.**
+| report report (22k) | 7698 | 2036 (2p, 3/4) | **1053 (1p)** | 4/4 (beats narrow) |
+**nyx-v2 = ~50% fewer tokens than the narrow baseline, ~86-87% fewer than text, equal-or-better accuracy.**
 Confirmed on real content, not synthetic. This is the production result.
 
 ## T21: multi-file single-page packing — WORKS + found a production bug
 - 3 small files in one Gemini page: 3/3 cross-file recall, 55% fewer tokens than text.
 - BUG FOUND: files containing the ↵ (U+21B5) reflow-sentinel make reflow() BAIL -> content
   renders unpacked (6 pages instead of 1). Production must neutralizeSentinel() before reflow.
-  narrow-baseline's transform.ts has maybeReflow() doing exactly this — our v2 must too.
+  (the vendored renderer has a maybeReflow path doing this — our v2 uses it).
 - Multi-file packing is a killer feature for codebase-wide tasks: pack many files into one
   flat-billed Gemini page, ask cross-file questions. Needs the sentinel fix to work reliably.
 
@@ -325,7 +325,7 @@ The vision encoder's processing of a dense image takes longer than processing eq
 text. This is a genuine tradeoff: Nyx saves MONEY (tokens) but costs TIME (latency).
 Best for: cost-sensitive batch/background work, huge contexts that wouldn't fit as text,
 or where token budget (not wall-clock) is the binding constraint. NOT for latency-critical
-interactive use. (This nuance is absent from narrow-baseline's framing — an honest addition.)
+interactive use. (An honest addition often missing from token-only framings.)
 
 ## T24: image size does NOT affect latency (can't mitigate via smaller images)
 Same 12.8k content at cols 312/468/700 (0.5-0.6 Mpx): latency flat ~5.6-6s.
@@ -364,15 +364,15 @@ This is the production architecture for long agent sessions — exactly VIST's s
 working on a frozen commercial API with no training.
 
 ## T28: HONEST calibration — nyx's win is DOC-SIZE dependent
-| doc size | narrow-baseline | nyx | saving |
+| doc size | narrow | nyx | saving |
 |---|---|---|---|
 | <15k chars | 1p | 1p | -4% (nyx slightly WORSE) |
 | ~29k chars | 2p | 1p | +51% |
 | 59k chars | 3p | 2p | +35% |
 | 120k chars | 6p | 4p | +36% |
-The 50% headline applies to docs >15k chars (where narrow-baseline needs 2+ pages, nyx packs 1).
+The 50% headline applies to docs >15k chars (where the narrow geometry needs 2+ pages, nyx packs 1).
 Below 15k, both fit one page and nyx's wider geometry costs 4% MORE. Honest fix: use
-narrow-baseline-style narrow geometry for small docs, wide-page for large. The average win across
+narrow geometry for small docs, wide-page for large. The average win across
 mixed sizes is ~35%, not 50% — 50% is the large-doc best case. Don't overclaim.
 
 ## T29: Flash vs Pro for imaged reads — Flash is a cheaper option, equal accuracy
@@ -383,13 +383,13 @@ tolerates it (cheaper), Pro when max reasoning is needed. Both read the renders 
 
 ## T30: abstention prompt — nothing to fix on Gemini (0 confabulation)
 12 GUIDs, Gemini 3.1 Pro: 12/12 correct both with and without abstention prompt. Zero
-confabulation. Gemini's verbatim OCR is strong enough that narrow-baseline's Opus-era confabulation
-problem is essentially ABSENT here. Abstention prompting (narrow-baseline's unbuilt roadmap item) is
+confabulation. Gemini's verbatim OCR is strong enough that the weak-encoder confabulation
+problem is essentially ABSENT here. Abstention prompting is
 unnecessary on Gemini. (Would still help weaker encoders like Opus — untested.)
 
 ## T31: adversarial verbatim — Gemini reads 40-char SHA-1 hashes 8/8 EXACT
 Hardest verbatim test: 8 random 40-character hex SHA-1 hashes in a 200-line log.
-Gemini 3.1 Pro: 8/8 EXACT (all 40 chars correct). This DEMOLISHES narrow-baseline's documented limit
+Gemini 3.1 Pro: 8/8 EXACT (all 40 chars correct). This far exceeds prior documented limits
 (Opus 0/15 on mere 12-char hex). Gemini's optical OCR is production-grade for verbatim —
 even long dense hashes read perfectly at full density. The "optical is lossy for exact
 strings" caveat is largely a WEAK-ENCODER artifact; on Gemini 3.1 Pro it mostly evaporates.
@@ -462,14 +462,14 @@ implement X" agent workflows, not just Q&A.
 Gemini finds facts across 2 pages reliably regardless of position hints. Multi-page recall
 is robust at small page counts. (Hints might help at 6+ pages — untested, low priority.)
 
-## T39: CAPSTONE — final tuned tool vs narrow-baseline vs text (the definitive numbers)
-| doc size | vs narrow-baseline | vs text |
+## T39: CAPSTONE — final tuned tool vs narrow baseline vs text (the definitive numbers)
+| doc size | vs narrow | vs text |
 |---|---|---|
 | 7k (small) | 0% (parity, no penalty) | 50% |
 | 22k | 49% | 83% |
 | 44k | 34% | 83% |
 | 89k | 38% | 87% |
 Final tuned Nyx: size-adaptive geometry eliminated the small-doc penalty (was -4%, now 0%).
-34-49% fewer tokens than narrow-baseline on real-sized docs, 50-87% fewer than text. This is the
-shipped v2.4 behavior. The headline: ~40% avg fewer than narrow-baseline, ~83% fewer than text, on
+34-49% fewer tokens than the narrow baseline on real-sized docs, 50-87% fewer than text. This is the
+shipped v2.4 behavior. The headline: ~40% avg fewer than the narrow baseline, ~83% fewer than text, on
 Gemini, at equal-or-better accuracy. Honest, measured, reproducible.
